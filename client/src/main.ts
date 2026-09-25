@@ -1,9 +1,15 @@
-const output = document.querySelector<HTMLDivElement>("#terminal-output");
-const terminal = document.querySelector<HTMLElement>("#terminal");
+function requireElement<T extends Element>(selector: string): T {
+  const element = document.querySelector<T>(selector);
 
-if (!output || !terminal) {
-  throw new Error("terminal DOM is incomplete");
+  if (!element) {
+    throw new Error(`required terminal element not found: ${selector}`);
+  }
+
+  return element;
 }
+
+const output = requireElement<HTMLDivElement>("#terminal-output");
+const terminal = requireElement<HTMLElement>("#terminal");
 
 const lines = [
   "SYSTEM 13 // PRE-ALPHA",
