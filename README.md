@@ -119,6 +119,25 @@ Operations
 
 Implementation details will be finalized during the framework milestone rather than locked in during repository initialization.
 
+## Development
+
+The current `dev` branch contains the first working framework scaffold. It uses Node.js 22+, TypeScript, esbuild, Node's built-in HTTP server, and a vanilla browser client.
+
+```bash
+git clone https://github.com/merberg-ai/system-13.git
+cd system-13
+git checkout dev
+./scripts/dev.sh
+```
+
+Build the production bundle with:
+
+```bash
+./scripts/build.sh
+```
+
+See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for the current source layout, endpoints, configuration behavior, and development workflow.
+
 ## Production Target
 
 The initial production target is:
@@ -175,13 +194,13 @@ These commands are design targets and are not implemented yet.
 
 - [x] Initialize repository documentation.
 - [x] Define core game concept and deployment safety rules.
-- [ ] Select and scaffold the application framework.
-- [ ] Add development/build tooling.
-- [ ] Add a minimal SYSTEM 13 service.
-- [ ] Add the terminal client shell.
-- [ ] Add configuration handling.
-- [ ] Add `system13ctl`.
-- [ ] Add install/deploy/update/rollback scripts.
+- [x] Select and scaffold the initial application stack.
+- [x] Add development/build tooling.
+- [x] Add a minimal SYSTEM 13 service.
+- [x] Add the terminal client shell.
+- [x] Add configuration handling and validation.
+- [x] Add the initial `system13ctl` helper.
+- [ ] Add production install/deploy/update/rollback scripts.
 
 ### Phase 1 — First Connection
 
