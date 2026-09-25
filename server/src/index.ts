@@ -10,7 +10,9 @@ const config = loadConfig();
 const startedAt = Date.now();
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const publicDir = path.resolve(here, "../public");
+const publicDir = process.env.SYSTEM13_PUBLIC_DIR
+  ? path.resolve(process.env.SYSTEM13_PUBLIC_DIR)
+  : path.resolve(here, "../public");
 
 const mimeTypes: Record<string, string> = {
   ".css": "text/css; charset=utf-8",
@@ -47,7 +49,14 @@ function sendText(
 
 function safePublicPath(urlPath: string): string | null {
   const requested = urlPath === "/" ? "/index.html" : urlPath;
-  const decoded = decodeURIComponent(requested);
+  let decoded: string;
+
+  try {
+    decoded = decodeURIComponent(requested);
+  } catch {
+    return null;
+  }
+
   const candidate = path.resolve(publicDir, `.${decoded}`);
 
   if (candidate !== publicDir && !candidate.startsWith(publicDir + path.sep)) {
