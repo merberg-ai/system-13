@@ -9,10 +9,11 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "tsx watch server/src/index.ts",
+    "dev": "bash scripts/dev.sh",
     "build": "node scripts/build.mjs",
     "check": "tsc --noEmit",
-    "start": "node dist/server/index.js"
+    "start": "node dist/server/index.js",
+    "dev:server": "tsx watch server/src/index.ts"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
