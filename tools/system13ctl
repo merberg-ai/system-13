@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SERVICE_NAME="system13"
+INSTALL_ROOT="${SYSTEM13_INSTALL_ROOT:-/opt/system13}"
+CONFIG_FILE="${SYSTEM13_CONFIG:-/etc/system13/config.yaml}"
+
+usage() {
+  cat <<'EOF'
+SYSTEM 13 administration
+
+Usage:
+  system13ctl status
+  system13ctl start
+  system13ctl stop
+  system13ctl restart
+  system13ctl logs
+  system13ctl health
+  system13ctl version
+  system13ctl config validate [path]
+  system13ctl help
+
+This is the initial scaffold. Deployment/update/rollback commands will be
+added with the production installer.
+EOF
+}
+
+need_systemd() {
+  if ! command -v systemctl >/dev/null 2>&1; then
+    echo "systemctl is not available on this host." >&2
+    exit 1
+  fi
+}
+
+case "${1:-help}" in
+  status)
+    need_systemd
+    exec systemctl status "$SERVICE_NAME"
+    ;;
+  start|stop|restart)
+    need_systemd
+    exec systemctl "$1" "$SERVICE_NAME"
+    ;;
+  logs)
+    need_systemd
+    exec journalctl -u "$SERVICE_NAME" -f
+    ;;
+  health)
+    exec curl -fsS http://127.0.0.1:1313/health
+    ;;
+  version)
+    if [[ -f "$INSTALL_ROOT/VERSION" ]]; then
+      cat "$INSTALL_ROOT/VERSION"
+    else
+      exec curl -fsS http://127.0.0.1:1313/version
+    fi
+    ;;
+  config)
+    if [[ "${2:-}" != "validate" ]]; then
+      usage
+      exit 2
+    fi
+
+    candidate="${3:-$CONFIG_FILE}"
+    validator="$INSTALL_ROOT/dist/server/validate-config.js"
+
+    if [[ ! -f "$validator" ]]; then
+      echo "Validator not found: $validator" >&2
+      echo "Build/install SYSTEM 13 first." >&2
+      exit 1
+    fi
+
+    exec node "$validator" "$candidate"
+    ;;
+  help|-h|--help)
+    usage
+    ;;
+  *)
+    echo "Unknown command: $1" >&2
+    echo
+    usage
+    exit 2
+    ;;
+esac
