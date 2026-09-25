@@ -27,7 +27,7 @@ Then open:
 http://127.0.0.1:1313
 ```
 
-The development launcher installs npm dependencies on first use and runs the service with `config.example.yaml`.
+The development launcher installs npm dependencies on first use, watches the browser TypeScript bundle, watches/restarts the server TypeScript entry point, and runs the service with `config.example.yaml`. HTML and CSS are linked directly into the temporary development public directory.
 
 ## Build
 
