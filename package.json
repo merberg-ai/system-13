@@ -1,0 +1,24 @@
+{
+  "name": "system-13",
+  "version": "0.0.1-dev",
+  "private": true,
+  "description": "Browser-based retro terminal hacking adventure.",
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "tsx watch server/src/index.ts",
+    "build": "node scripts/build.mjs",
+    "check": "tsc --noEmit",
+    "start": "node dist/server/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "esbuild": "^0.25.9",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "yaml": "^2.8.1"
+  }
+}
