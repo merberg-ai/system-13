@@ -23,15 +23,20 @@ Every Nginx change is validated with `nginx -t` before Nginx is reloaded. Certbo
 ## Requirements
 
 - Linux with systemd
-- Node.js 22+ installed system-wide (not only beneath a user's home directory)
-- npm
-- git
-- curl
+- git and curl (the installer can install missing base utilities on apt-based systems)
 - an existing Nginx installation using `sites-available` / `sites-enabled`
 - Certbot for automatic HTTPS setup
 - DNS for `system13.kj6ywd.net` pointed at the server before the HTTPS step
 
-The installer can install missing `git`, `curl`, `nodejs`, and `npm` packages on apt-based systems. It deliberately does not install or replace Nginx. If the distro's Node.js package is older than 22, install a system-wide Node.js 22+ package and rerun the installer.
+SYSTEM 13 requires Node.js 22+. If a suitable host `node` + `npm` installation is already available, the installer uses it. Otherwise, on x86-64 or arm64 Linux it downloads the current official Node.js `latest-v22.x` archive from `nodejs.org`, verifies the archive against Node's published SHA-256 manifest, and installs a private runtime under:
+
+```text
+/opt/system13/runtime/node
+```
+
+This does not replace or modify the server's global Node.js installation. Later SYSTEM 13 updates automatically reuse the private runtime when present.
+
+The installer deliberately does not install, replace, or reconfigure Nginx itself.
 
 ## Development-channel install
 
@@ -42,9 +47,24 @@ curl -fsSL https://raw.githubusercontent.com/merberg-ai/system-13/dev/scripts/in
   | sudo env SYSTEM13_BRANCH=dev bash
 ```
 
-The installer builds/tests the candidate, creates a dedicated `system13` service account, installs an atomic release under `/opt/system13/releases`, starts the daemon on `127.0.0.1:1313`, health-checks it, adds only the SYSTEM 13 HTTP vhost, validates Nginx, and then attempts Certbot webroot issuance.
+The installer:
 
-If DNS is not ready, the application remains installed and the SSL step is skipped/failed without changing unrelated Nginx sites. After DNS is ready:
+1. verifies/bootstraps its build runtime
+2. clones the selected SYSTEM 13 branch
+3. type-checks the code
+4. validates scenarios
+5. runs engine tests
+6. builds the production bundle
+7. creates the dedicated `system13` service account
+8. installs an immutable release under `/opt/system13/releases`
+9. switches `/opt/system13/current` atomically
+10. starts the localhost daemon on `127.0.0.1:1313`
+11. checks `/health`
+12. creates only the SYSTEM 13 Nginx HTTP vhost
+13. runs `nginx -t` before reload
+14. attempts Certbot webroot issuance when Certbot/DNS are available
+
+If DNS is not ready, the application remains installed and the SSL step fails safely without changing unrelated Nginx sites. After DNS is ready:
 
 ```bash
 sudo system13ctl ssl setup
@@ -102,7 +122,7 @@ Safe disable/preserve:
 sudo system13ctl uninstall
 ```
 
-This disables the service and SYSTEM 13 vhost while retaining the repo, releases, config, data, and certificates.
+This disables the service and SYSTEM 13 vhost while retaining the repo, releases, config, data, private runtime, and certificates.
 
 Full application/config/data purge:
 
