@@ -13,6 +13,8 @@
   },
   "include": [
     "server/src/**/*.ts",
-    "client/src/**/*.ts"
+    "client/src/**/*.ts",
+    "scripts/**/*.ts",
+    "tests/**/*.ts"
   ]
 }

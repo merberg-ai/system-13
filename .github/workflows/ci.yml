@@ -32,5 +32,11 @@ jobs:
       - name: Type-check
         run: npm run check
 
+      - name: Validate scenarios
+        run: npm run scenarios:validate
+
+      - name: Test engine
+        run: npm test
+
       - name: Build
         run: npm run build

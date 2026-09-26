@@ -1,6 +1,6 @@
 {
   "name": "system-13",
-  "version": "0.0.1-dev",
+  "version": "0.1.0-alpha.1",
   "private": true,
   "description": "Browser-based retro terminal hacking adventure.",
   "license": "GPL-3.0-only",
@@ -12,6 +12,8 @@
     "dev": "bash scripts/dev.sh",
     "build": "node scripts/build.mjs",
     "check": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "scenarios:validate": "tsx scripts/validate-scenarios.ts",
     "start": "node dist/server/index.js",
     "dev:server": "tsx watch server/src/index.ts"
   },
