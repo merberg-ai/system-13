@@ -15,7 +15,8 @@
     "test": "tsx --test tests/*.test.ts",
     "scenarios:validate": "tsx scripts/validate-scenarios.ts",
     "start": "node dist/server/index.js",
-    "dev:server": "tsx watch server/src/index.ts"
+    "dev:server": "tsx watch server/src/index.ts",
+    "scenario:new": "node scripts/new-scenario.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

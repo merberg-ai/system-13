@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"; source "$SCRIPT_DIR/lib-common.sh"; need_root; need_cmd nginx
-AVAILABLE="/etc/nginx/sites-available/$SYSTEM13_DOMAIN"; ENABLED="/etc/nginx/sites-enabled/$SYSTEM13_DOMAIN"; ACME_ROOT="/var/www/system13-acme"; BACKUP=""
+AVAILABLE="/etc/nginx/sites-available/$SYSTEM13_DOMAIN"
+ENABLED="/etc/nginx/sites-enabled/$SYSTEM13_DOMAIN"
+ACME_ROOT="/var/www/system13-acme"
+BACKUP=""
+HAD_ENABLED=false
+[[ -e "$ENABLED" || -L "$ENABLED" ]] && HAD_ENABLED=true
 install -d -o www-data -g www-data -m 0755 "$ACME_ROOT/.well-known/acme-challenge"
 if [[ -f "$AVAILABLE" ]]; then BACKUP="$(mktemp)"; cp -a "$AVAILABLE" "$BACKUP"; fi
 cat > "$AVAILABLE" <<CONF
@@ -28,5 +33,19 @@ server {
 }
 CONF
 ln -sfn "$AVAILABLE" "$ENABLED"
-if ! nginx -t; then log FAIL "Nginx rejected the SYSTEM 13 vhost; restoring previous state."; rm -f "$ENABLED"; if [[ -n "$BACKUP" ]]; then cp -a "$BACKUP" "$AVAILABLE"; ln -sfn "$AVAILABLE" "$ENABLED"; else rm -f "$AVAILABLE"; fi; nginx -t || true; rm -f "$BACKUP"; exit 1; fi
-rm -f "$BACKUP"; systemctl reload nginx; log OK "HTTP vhost enabled for $SYSTEM13_DOMAIN"
+if ! nginx -t; then
+  log FAIL "Nginx rejected the SYSTEM 13 vhost; restoring previous state."
+  rm -f "$ENABLED"
+  if [[ -n "$BACKUP" ]]; then
+    cp -a "$BACKUP" "$AVAILABLE"
+    $HAD_ENABLED && ln -sfn "$AVAILABLE" "$ENABLED"
+  else
+    rm -f "$AVAILABLE"
+  fi
+  nginx -t || true
+  rm -f "$BACKUP"
+  exit 1
+fi
+rm -f "$BACKUP"
+systemctl reload nginx
+log OK "HTTP vhost enabled for $SYSTEM13_DOMAIN"
