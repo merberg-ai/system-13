@@ -53,7 +53,6 @@ bootstrap_node() {
   echo "[NODE] Installing private Node.js 22 runtime for linux-$arch under $SYSTEM13_ROOT/runtime"
   mkdir -p "$SYSTEM13_ROOT/runtime"
   tmp="$(mktemp -d)"
-  trap 'rm -rf "$tmp"' RETURN
   base="https://nodejs.org/dist/latest-v22.x"
   sums="$tmp/SHASUMS256.txt"
   curl -fsSL "$base/SHASUMS256.txt" -o "$sums"
@@ -71,6 +70,7 @@ bootstrap_node() {
   mv "$tmp/$extracted" "$target"
   ln -sfn "$target" "$SYSTEM13_ROOT/runtime/node.new"
   mv -Tf "$SYSTEM13_ROOT/runtime/node.new" "$SYSTEM13_ROOT/runtime/node"
+  rm -rf "$tmp"
   export PATH="$SYSTEM13_ROOT/runtime/node/bin:$PATH"
   echo "[NODE] Installed $(node -v) at $(command -v node)"
 }
