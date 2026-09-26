@@ -2,126 +2,139 @@
 
 > A browser-based retro terminal hacking adventure with procedural mysteries, fake Linux systems, corporate conspiracies, and locally saved randomized scenarios.
 
-**Status:** Pre-alpha / initial design and repository scaffolding.
+**Status:** `0.1.0-alpha.1` on the `dev` branch — first playable alpha, ready for live-host/browser testing.
 
-SYSTEM 13 is a browser game built around the illusion of discovering and accessing forgotten computer systems through an old modem connection. The player begins by war-dialing a fictional phone range, eventually connects to an unknown system, gains limited user access, explores a simulated Unix/Linux-like environment, discovers fictional vulnerabilities and credentials, and works toward deeper privilege levels and ultimately root access.
+SYSTEM 13 is a browser game built around the illusion of discovering forgotten computer systems through an old modem connection. The player begins by war-dialing a fictional phone range, connects to an unknown corporate system, gains limited user access, explores a simulated Unix-like environment, discovers fictional vulnerabilities and credentials, pivots between fake hosts, and works toward root access and classified material.
 
-The terminal is the game world.
+**The terminal is the game world.**
 
-## Core Experience
+SYSTEM 13 never executes player commands in a real operating-system shell. Commands operate only on game-controlled users, files, processes, services, hosts, permissions, events, and state.
 
-A typical run is intended to flow something like this:
+## First Playable Scenario
+
+The initial scenario is **American Meridian Corporation**, an aggressively wholesome industrial/research conglomerate with a less wholesome BLACK archive.
+
+A seeded run selects from a pool of classified projects including:
+
+- ORPHEUS
+- HARVEST
+- JANUS
+- COLDSTAR
+- WATCHTOWER
+- LAMPLIGHT
+- CHIMERA
+- NIGHTGLASS
+- HOMEFRONT
+- REDWOOD
+- PALADIN
+- ECHO
+
+The project, incident, government partner, personnel names, credentials, and anomalies are generated deterministically from the run seed.
+
+The current first-run progression supports a complete playable path:
 
 ```text
-MODEM INITIALIZED
-       |
-       v
 WAR DIAL
-       |
-       v
-UNKNOWN SYSTEM ANSWERS
-       |
-       v
-LOGIN PROMPT
-       |
-       v
-LIMITED USER ACCESS
-       |
-       v
-EXPLORE FILES / MAIL / LOGS / HOSTS
-       |
-       v
-DISCOVER FICTIONAL EXPLOITS
-       |
-       v
-GAIN PRIVILEGES
-       |
-       v
-UNCOVER THE PROJECT
-       |
-       v
-ROOT ACCESS
-       |
-       v
-ENDING / REWARD / SOMETHING WORSE
+   |
+   v
+NODE13 LOGIN
+   |
+   v
+GUEST ACCESS
+   |
+   v
+DISCOVER LEGACY BACKUP CREDENTIALS
+   |
+   v
+MILLER ACCOUNT
+   |
+   v
+DISCOVER ARCHIVE03
+   |
+   v
+SSH TO ARCHIVE03
+   |
+   v
+FIND FICTIONAL DIAGNOSTIC BACKDOOR
+   |
+   v
+ROOT
+   |
+   v
+BLACK RETENTION FILE
+   |
+   v
+ENDING
 ```
 
-The game takes inspiration from retro-futuristic terminals, old BBS and modem culture, command-line adventure games, corporate-conspiracy fiction, and postwar/Cold-War-era science-fiction aesthetics.
+The complete escalation route is covered by an automated engine test.
 
-SYSTEM 13 is **not** intended to execute real shell commands or expose the host operating system. The player interacts with a simulated command interpreter, virtual filesystem, fake network, fictional services, and game-controlled state.
+## Current Engine
 
-## Design Goals
+The browser client currently includes:
 
-- Browser-first and easy to host.
-- Convincing old terminal / CRT presentation.
-- Fictional Unix/Linux-style shell with enough familiar behavior to reward experimentation.
-- Procedural runs generated from deterministic seeds.
-- Multiple companies, incidents, projects, facilities, characters, clues, escalation paths, endings, and rewards.
-- Scenario content kept separate from the core game engine.
-- Easy scenario authoring and validation.
-- Local browser save/resume for the initial releases.
-- Safe by design: the in-game shell never becomes a real system shell.
-- Simple production deployment behind an existing Nginx installation.
-- Conservative deployment tooling that never rewrites unrelated web-server configuration.
+- CRT-style terminal presentation
+- modem/war-dial intro
+- login and password states
+- command parser with quoting/escaping
+- fake users, groups, UIDs and POSIX-like permissions
+- virtual filesystems per host
+- fake processes and services
+- fake host/network topology
+- nested SSH session stack
+- `su` and fictional privilege escalation
+- declarative story conditions/actions
+- deterministic named RNG streams
+- seeded scenario generation
+- IndexedDB saves with localStorage fallback
+- resume/new-run handling
+- run IDs
+- achievements/endings
+- host-specific fictional utilities
 
-## Scenario Concept
-
-The initial version will begin with a single fictional company and a small scenario pool. Future scenario packs can add new companies, classified projects, incidents, employees, hosts, files, messages, puzzles, endings, and rare anomalies without changing the game engine.
-
-Candidate story themes include:
-
-- abandoned government research programs
-- biological experiments
-- behavioral research
-- surveillance systems
-- artificial intelligence
-- strange energy or materials research
-- robotics and human-machine interfaces
-- unexplained facility incidents
-- mundane corporate misconduct hiding something much stranger
-
-Scenario data will be versioned and validated against a documented schema once the scenario engine is implemented.
-
-## Planned Architecture
-
-SYSTEM 13 is expected to be divided into independent components:
+Implemented shell commands currently include:
 
 ```text
-Browser Client
-├── terminal renderer
-├── command interpreter
-├── virtual filesystem
-├── modem / war-dial sequence
-├── fake networking
-├── event and puzzle engine
-├── audio / CRT presentation
-└── local save manager
-
-SYSTEM 13 Service
-├── static game delivery
-├── configuration
-├── scenario discovery
-├── health/version endpoints
-└── optional future server-side features
-
-Content
-├── shared game data
-└── scenario packs
-
-Operations
-├── install
-├── build
-├── deploy
-├── update / rollback
-├── backup / restore
-└── system13ctl
+help clear pwd cd ls cat whoami id uname hostname history
+grep find ps env su sudo ssh exit netstat mail system
 ```
 
-Implementation details will be finalized during the framework milestone rather than locked in during repository initialization.
+Scenario packs may expose additional fictional commands, such as the American Meridian `diagctl` utility.
+
+## Architecture
+
+SYSTEM 13 separates authored content, generated content, player state, and presentation:
+
+```text
+ScenarioDefinition
+       |
+       | + deterministic seed
+       v
+GeneratedWorld
+       |
+       | + player actions
+       v
+RunState
+       |
+       v
+Terminal / Presentation
+```
+
+Scenario content is data rather than executable code. See:
+
+- [Engine design](docs/ENGINE.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Scenario system](docs/SCENARIOS.md)
+- [Scenario authoring](docs/SCENARIO_AUTHORING.md)
 
 ## Development
 
-The current `dev` branch contains the first working framework scaffold. It uses Node.js 22+, TypeScript, esbuild, Node's built-in HTTP server, and a vanilla browser client.
+Requirements:
+
+- Node.js 22+
+- npm
+
+Run the development branch:
 
 ```bash
 git clone https://github.com/merberg-ai/system-13.git
@@ -130,33 +143,75 @@ git checkout dev
 ./scripts/dev.sh
 ```
 
-Build the production bundle with:
+Then open:
+
+```text
+http://127.0.0.1:1313
+```
+
+Run all checks/builds with:
 
 ```bash
+npm run check
+npm run scenarios:validate
+npm test
 ./scripts/build.sh
 ```
 
-See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for the current source layout, endpoints, configuration behavior, and development workflow.
+Create a new scenario skeleton with:
+
+```bash
+npm run scenario:new -- my-company
+```
+
+See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for more detail.
 
 ## Production Target
 
-The initial production target is:
+The intended public deployment is:
 
 ```text
 https://system13.kj6ywd.net
 ```
 
-The SYSTEM 13 service will bind only to localhost and sit behind the existing Nginx installation.
+SYSTEM 13 binds only to `127.0.0.1:1313` and sits behind Nginx.
 
-Deployment tooling will follow one hard rule:
+The deployment tooling follows one hard rule:
 
 > Existing web services are production infrastructure. SYSTEM 13 may create and manage its own dedicated virtual host, but it must not modify unrelated Nginx sites, certificates, or application configuration.
 
-SSL setup will be designed around Certbot without allowing SYSTEM 13 deployment to overwrite the existing `kj6ywd.net` configuration.
+Certbot is invoked in `certonly --webroot` mode. SYSTEM 13 never invokes `certbot --nginx`.
 
-## Planned Administration
+### Development-channel install
 
-A single administrative command, `system13ctl`, is planned for production management. Expected responsibilities include:
+Until the first release is promoted to `main`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/merberg-ai/system-13/dev/scripts/install.sh \
+  | sudo env SYSTEM13_BRANCH=dev bash
+```
+
+The deployment system provides:
+
+- dedicated `system13` service account
+- systemd service
+- immutable release directories
+- atomic `current` symlink switching
+- pre-deploy type checking, scenario validation, tests, and build
+- localhost health checks
+- automatic release rollback after failed health checks
+- preserved `/etc/system13/config.yaml`
+- runtime maintenance flag
+- dedicated Nginx vhost only
+- `nginx -t` before reload
+- Certbot webroot issuance
+- safe update/rollback/uninstall tooling
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) before the first live installation.
+
+## Administration
+
+The production helper currently supports:
 
 ```text
 system13ctl status
@@ -164,106 +219,100 @@ system13ctl start
 system13ctl stop
 system13ctl restart
 system13ctl logs
+system13ctl health
+system13ctl version
+
+system13ctl maintenance status
+system13ctl maintenance on
+system13ctl maintenance off
 
 system13ctl config show
 system13ctl config edit
 system13ctl config validate
 
-system13ctl scenario list
-system13ctl scenario info
 system13ctl scenario validate
-
-system13ctl maintenance on
-system13ctl maintenance off
 
 system13ctl update
 system13ctl rollback
+system13ctl releases
 system13ctl backup
-system13ctl restore
 
 system13ctl nginx test
+system13ctl nginx show
 system13ctl ssl status
 system13ctl ssl setup
+
+system13ctl uninstall
 ```
 
-These commands are design targets and are not implemented yet.
+## Automated Validation
 
-## Development Roadmap
+GitHub Actions currently checks every push to `dev` and `main` for:
 
-### Phase 0 — Foundation
+- shell-script syntax
+- TypeScript correctness
+- scenario validation
+- engine tests
+- production build
 
-- [x] Initialize repository documentation.
-- [x] Define core game concept and deployment safety rules.
-- [x] Select and scaffold the initial application stack.
-- [x] Add development/build tooling.
-- [x] Add a minimal SYSTEM 13 service.
-- [x] Add the terminal client shell.
-- [x] Add configuration handling and validation.
-- [x] Add the initial `system13ctl` helper.
-- [ ] Add production install/deploy/update/rollback scripts.
+Scenario validation checks the scenario index, host references, generated world construction, and basic event references. The test suite includes deterministic RNG/parser coverage and an end-to-end American Meridian privilege-escalation run.
 
-### Phase 1 — First Connection
+## Roadmap
 
-- [ ] CRT terminal presentation.
-- [ ] Modem initialization sequence.
-- [ ] Procedural war-dial intro.
-- [ ] First fictional host.
-- [ ] Login system.
-- [ ] Basic shell commands.
-- [ ] Virtual filesystem.
-- [ ] Local save/resume.
+### Foundation / first playable
 
-### Phase 2 — First Scenario
+- [x] Repository/docs/license
+- [x] Node/TypeScript service scaffold
+- [x] CRT browser terminal
+- [x] deterministic engine state
+- [x] fake users/permissions/filesystem
+- [x] basic Unix-like command set
+- [x] fake processes/services/networking
+- [x] login, `su`, and SSH session flow
+- [x] declarative event system
+- [x] seeded generation
+- [x] local autosave/resume
+- [x] modem/war-dial intro
+- [x] first American Meridian scenario
+- [x] full guest-to-root progression
+- [x] scenario validator/tests
+- [x] install/deploy/update/rollback tooling
+- [x] isolated Nginx/Certbot deployment tooling
+- [ ] first live-host/browser qualification
 
-- [ ] Scenario schema and validator.
-- [ ] First company.
-- [ ] Employees and accounts.
-- [ ] Mail, logs, notes, and classified files.
-- [ ] Privilege-escalation puzzle chain.
-- [ ] Root-access sequence.
-- [ ] First endings and rewards.
+### Next expansion
 
-### Phase 3 — Procedural Expansion
+- [ ] deeper/randomized clue routes
+- [ ] multiple host topologies
+- [ ] more endings and rewards
+- [ ] rare run anomalies
+- [ ] manual dialing and discoverable numbers
+- [ ] richer mail/log utilities
+- [ ] additional companies/scenario packs
+- [ ] replay unlocks and cosmetics
+- [ ] expanded terminal/audio effects
 
-- [ ] Scenario pools.
-- [ ] Deterministic run seeds.
-- [ ] Multiple host topologies.
-- [ ] Randomized clue placement.
-- [ ] Rare anomalies.
-- [ ] Multiple endings.
-- [ ] Replay unlocks and manual dialing.
+## Security Boundary
 
-## Repository Layout
-
-The repository is currently in its initialization stage. The intended high-level layout is:
+All hacking, privilege escalation, network services, credentials, filesystems, and commands shown by the game are fictional simulations.
 
 ```text
-system-13/
-├── client/
-├── server/
-├── scenarios/
-├── public/
-├── scripts/
-├── packaging/
-├── tools/
-├── docs/
-├── README.md
-├── CONTRIBUTING.md
-├── CHANGELOG.md
-└── LICENSE
+PLAYER INPUT
+    |
+    v
+GAME COMMAND INTERPRETER
+    |
+    +--> virtual filesystem
+    +--> fake users / permissions
+    +--> fake processes / services
+    +--> fake network hosts
+    +--> scenario state
+    |
+    X
+REAL HOST SHELL
 ```
 
-Directories will be created as implementation work begins rather than populated with empty placeholders.
-
-## Contributing
-
-SYSTEM 13 is early in development. See [CONTRIBUTING.md](CONTRIBUTING.md) for the current contribution and development guidelines.
-
-## Security
-
-All hacking, privilege escalation, network services, credentials, filesystems, and commands presented by the game are fictional simulations. The browser terminal must never pass player commands to a real operating-system shell.
-
-If a future feature introduces server-side input handling, it must preserve this boundary.
+That boundary is a project requirement, not merely an implementation detail.
 
 ## License
 
@@ -271,9 +320,9 @@ SYSTEM 13 is licensed under the GNU General Public License v3.0. See [LICENSE](L
 
 ---
 
-**SYSTEM 13**
-
 ```text
+SYSTEM 13
+
 CARRIER DETECTED
 CONNECT 1200
 
