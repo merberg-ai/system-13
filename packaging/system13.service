@@ -1,0 +1,25 @@
+[Unit]
+Description=SYSTEM 13 browser game service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=system13
+Group=system13
+WorkingDirectory=/opt/system13/current
+Environment=NODE_ENV=production
+Environment=SYSTEM13_CONFIG=/etc/system13/config.yaml
+Environment=SYSTEM13_MAINTENANCE_FILE=/var/lib/system13/maintenance
+ExecStart=/usr/bin/node /opt/system13/current/dist/server/index.js
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/system13
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

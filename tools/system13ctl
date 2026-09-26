@@ -1,84 +1,34 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
-SERVICE_NAME="system13"
-INSTALL_ROOT="${SYSTEM13_INSTALL_ROOT:-/opt/system13}"
-CONFIG_FILE="${SYSTEM13_CONFIG:-/etc/system13/config.yaml}"
-
-usage() {
-  cat <<'EOF'
+SERVICE_NAME="system13"; ROOT="${SYSTEM13_ROOT:-/opt/system13}"; CURRENT="$ROOT/current"; REPO="$ROOT/repo"; CONFIG_FILE="${SYSTEM13_CONFIG:-/etc/system13/config.yaml}"; DATA_DIR="${SYSTEM13_DATA:-/var/lib/system13}"; DOMAIN="${SYSTEM13_DOMAIN:-system13.kj6ywd.net}"
+usage(){ cat <<'TXT'
 SYSTEM 13 administration
 
-Usage:
-  system13ctl status
-  system13ctl start
-  system13ctl stop
-  system13ctl restart
-  system13ctl logs
-  system13ctl health
-  system13ctl version
-  system13ctl config validate [path]
+Service:
+  system13ctl status|start|stop|restart|logs|health|version
+Game service:
+  system13ctl maintenance status|on|off
+  system13ctl config show|edit|validate [path]
+  system13ctl scenario validate
+Releases:
+  system13ctl update
+  system13ctl rollback [release-sha-or-path]
+  system13ctl releases
+  system13ctl backup
+Web:
+  system13ctl nginx test|show
+  system13ctl ssl status|setup
+Other:
+  system13ctl uninstall [--purge]
   system13ctl help
-
-This is the initial scaffold. Deployment/update/rollback commands will be
-added with the production installer.
-EOF
+TXT
 }
-
-need_systemd() {
-  if ! command -v systemctl >/dev/null 2>&1; then
-    echo "systemctl is not available on this host." >&2
-    exit 1
-  fi
-}
-
+need_root(){ [[ ${EUID:-$(id -u)} -eq 0 ]] || { echo "Run with sudo/root." >&2; exit 1; }; }
+script(){ local name="$1"; shift; local p="$REPO/scripts/$name"; [[ -x "$p" ]] || p="$CURRENT/scripts/$name"; [[ -x "$p" ]] || { echo "Script not found: $name" >&2; exit 1; }; exec "$p" "$@"; }
 case "${1:-help}" in
-  status)
-    need_systemd
-    exec systemctl status "$SERVICE_NAME"
-    ;;
-  start|stop|restart)
-    need_systemd
-    exec systemctl "$1" "$SERVICE_NAME"
-    ;;
-  logs)
-    need_systemd
-    exec journalctl -u "$SERVICE_NAME" -f
-    ;;
-  health)
-    exec curl -fsS http://127.0.0.1:1313/health
-    ;;
-  version)
-    if [[ -f "$INSTALL_ROOT/VERSION" ]]; then
-      cat "$INSTALL_ROOT/VERSION"
-    else
-      exec curl -fsS http://127.0.0.1:1313/version
-    fi
-    ;;
-  config)
-    if [[ "${2:-}" != "validate" ]]; then
-      usage
-      exit 2
-    fi
-
-    candidate="${3:-$CONFIG_FILE}"
-    validator="$INSTALL_ROOT/dist/server/validate-config.js"
-
-    if [[ ! -f "$validator" ]]; then
-      echo "Validator not found: $validator" >&2
-      echo "Build/install SYSTEM 13 first." >&2
-      exit 1
-    fi
-
-    exec node "$validator" "$candidate"
-    ;;
-  help|-h|--help)
-    usage
-    ;;
-  *)
-    echo "Unknown command: $1" >&2
-    echo
-    usage
-    exit 2
-    ;;
-esac
+status) exec systemctl status "$SERVICE_NAME";; start|stop|restart) need_root; exec systemctl "$1" "$SERVICE_NAME";; logs) exec journalctl -u "$SERVICE_NAME" -f;; health) exec curl -fsS http://127.0.0.1:1313/health;; version) [[ -f "$CURRENT/VERSION" ]] && cat "$CURRENT/VERSION" || exec curl -fsS http://127.0.0.1:1313/version;;
+maintenance) case "${2:-status}" in status) [[ -f "$DATA_DIR/maintenance" ]]&&echo "maintenance: on"||echo "maintenance: off";; on) need_root; install -d -o system13 -g system13 -m 0750 "$DATA_DIR"; touch "$DATA_DIR/maintenance"; chown system13:system13 "$DATA_DIR/maintenance"; echo "maintenance: on";; off) need_root; rm -f "$DATA_DIR/maintenance"; echo "maintenance: off";; *) usage;exit 2;; esac;;
+config) case "${2:-show}" in show) cat "$CONFIG_FILE";; edit) need_root; "${EDITOR:-nano}" "$CONFIG_FILE";; validate) candidate="${3:-$CONFIG_FILE}"; validator="$CURRENT/dist/server/validate-config.js"; [[ -f "$validator" ]]||{ echo "Validator not found." >&2;exit 1;}; exec node "$validator" "$candidate";; *) usage;exit 2;; esac;;
+scenario) [[ "${2:-}" == "validate" ]]||{ usage;exit 2;}; cd "$REPO"; exec npm run scenarios:validate;; update) need_root; script update.sh;; rollback) need_root; script rollback.sh "${2:-}";;
+releases) current="$(readlink -f "$CURRENT" 2>/dev/null||true)"; for d in "$ROOT"/releases/*; do [[ -d "$d" ]]||continue; mark=" "; [[ "$(readlink -f "$d")" == "$current" ]]&&mark="*"; printf '%s %s\n' "$mark" "$(basename "$d")"; done;; backup) need_root; script backup.sh;;
+nginx) case "${2:-test}" in test) exec nginx -t;; show) cat "/etc/nginx/sites-available/$DOMAIN";; *) usage;exit 2;; esac;; ssl) case "${2:-status}" in status) certbot certificates -d "$DOMAIN";; setup) need_root; script ssl-setup.sh;; *) usage;exit 2;; esac;; uninstall) need_root; script uninstall.sh "${2:-}";; help|-h|--help) usage;; *) echo "Unknown command: $1" >&2;echo;usage;exit 2;; esac
