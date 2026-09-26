@@ -34,11 +34,15 @@ A scenario may eventually provide:
 - rewards
 - rare anomalies
 
+The first concrete draft of how these concepts fit into the engine is documented in [ENGINE.md](ENGINE.md).
+
 ## Procedural Runs
 
 A new run should be generated from a deterministic seed.
 
 Given compatible engine/scenario versions and the same seed, static generated content should be reproducible. Mutable player state is then stored separately in the save.
+
+The engine design uses separate named deterministic random streams for major generation domains so unrelated content changes do not unnecessarily scramble the entire run.
 
 This makes it possible to support shareable run IDs later.
 
@@ -57,6 +61,16 @@ Scenario packs should eventually have a validator that can detect issues such as
 - unsupported commands/events
 - schema-version mismatches
 
+The validator should eventually include lightweight progression/reachability checks in addition to basic schema validation.
+
+## Declarative Behavior
+
+Scenario packs may define data, conditions, actions, random pools, templates, and engine-supported fictional utilities.
+
+They must not contain arbitrary JavaScript, shell scripts, or host filesystem operations.
+
+If a scenario requires a genuinely new mechanic, that capability should be added deliberately to the engine and then exposed through a safe declarative model.
+
 ## Extensibility
 
 The first release will begin small: one company and a limited scenario pool.
@@ -69,4 +83,6 @@ Scenario content may depict fictional hacking and privilege escalation, but scen
 
 ## Status
 
-The concrete directory structure and schema have intentionally not been finalized yet. They will be designed alongside the first working engine so the format reflects actual requirements rather than guesses.
+A draft scenario-pack directory layout, stable-ID scheme, deterministic-generation model, event model, and validation strategy now exist in [ENGINE.md](ENGINE.md).
+
+The exact YAML schema remains intentionally unfrozen until the first E0/E1 engine implementation demonstrates what the authoring format actually needs.
