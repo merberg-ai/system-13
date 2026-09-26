@@ -83,6 +83,8 @@ The engine should operate on generic concepts rather than named story content:
 
 Scenario packs provide the actual names, text, relationships, clues, and rules.
 
+The concrete engine design is documented in [ENGINE.md](ENGINE.md).
+
 ### Save System
 
 Initial saves should remain in the browser.
@@ -158,6 +160,6 @@ Expected production locations:
 
 These locations are design targets until deployment tooling is implemented.
 
-## Next Architecture Milestone
+## Current Architecture Milestone
 
-The next milestone is to choose and scaffold the concrete application framework while preserving the boundaries above.
+The application scaffold is now established on `dev`. The current design milestone is the first browser-side game engine vertical slice described in [ENGINE.md](ENGINE.md), beginning with deterministic state, a fake host, virtual filesystem, users/permissions, command parsing, login, and basic Unix-like commands.
