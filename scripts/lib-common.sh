@@ -10,6 +10,11 @@ SYSTEM13_DATA="${SYSTEM13_DATA:-/var/lib/system13}"
 SYSTEM13_DOMAIN="${SYSTEM13_DOMAIN:-system13.kj6ywd.net}"
 SYSTEM13_BRANCH="${SYSTEM13_BRANCH:-main}"
 SYSTEM13_REPO_URL="${SYSTEM13_REPO_URL:-https://github.com/merberg-ai/system-13.git}"
+
+if [[ -x "$SYSTEM13_ROOT/runtime/node/bin/node" ]]; then
+  export PATH="$SYSTEM13_ROOT/runtime/node/bin:$PATH"
+fi
+
 log(){ printf '[%s] %s\n' "$1" "$2"; }
 die(){ log FAIL "$1" >&2; exit 1; }
 need_root(){ [[ ${EUID:-$(id -u)} -eq 0 ]] || die "Run this command as root (sudo)."; }
