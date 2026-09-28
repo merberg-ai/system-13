@@ -11,9 +11,17 @@ function newEngine(): GameEngine {
   return new GameEngine(generateWorld(scenario, "NORTHSTAR-TEST-13"));
 }
 
-test("Northstar field-to-root path reaches DARKLINE ending", () => {
+test("Northstar guest-to-root path reaches DARKLINE ending", () => {
   const engine = newEngine();
-  engine.handleInput("field");
+  engine.handleInput("guest");
+  engine.handleInput("visitor");
+  assert.equal(engine.user?.username, "guest");
+
+  const guestReadme = engine.handleInput("cat README").lines.join("\n");
+  assert.match(guestReadme, /FIELD USER: field/);
+  assert.match(guestReadme, /FIELD PASS: service/);
+
+  engine.handleInput("su field");
   engine.handleInput("service");
   assert.equal(engine.user?.username, "field");
 
