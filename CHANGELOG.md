@@ -27,7 +27,7 @@ The project is currently pre-release.
 - Northstar Systems Group relay scenario with an independent field-service login, operations-account escalation path, root recovery trail, and DARKLINE ending.
 - Scenario selection during new war-dial scans, preferring a different scenario pack than the currently active target when alternatives are available.
 - Scenario index, schema validation, deterministic generation, authoring documentation, and `npm run scenario:new -- <id>` helper.
-- Engine tests covering RNG, parsing, permissions, deterministic generation, the complete American Meridian escalation path, local dialer commands, multi-target phonebook behavior, and the Northstar field-to-root path.
+- Engine tests covering RNG, parsing, permissions, deterministic generation, the complete American Meridian escalation path, local dialer commands, multi-target phonebook behavior, Northstar progression, and war-dial failure-count variation.
 - GitHub Actions checks for shell syntax, TypeScript, scenario validation, tests, production build, and a real built-daemon `/health` smoke test.
 - Production deployment tooling with a dedicated `system13` account, systemd service, immutable releases, atomic switching, health checks, pre-activation production smoke testing, automatic rollback, backups, and maintenance mode.
 - `system13ctl` administrative helper for service control, configuration, scenarios, releases, maintenance, Nginx, SSL, backup, update, rollback, and uninstall operations.
@@ -37,13 +37,13 @@ The project is currently pre-release.
 
 ### Changed
 
-- Version advanced to `0.1.0-alpha.3` for the local-shell, multi-target, and second-scenario milestone.
+- Version advanced to `0.1.0-alpha.4` for the randomized scan-length behavior pass.
+- Every `scan` now guarantees at least one failed call before connection, with a randomized 1–8 failed attempts so repeated scans do not fall into an obvious fixed rhythm.
 - Top-level remote `exit`, `logout`, or `quit` now hangs up the modem and returns to the SYSTEM 13 local shell; nested SSH `exit` still returns to the previous remote host.
 - `system disconnect` now drops carrier back to local control while preserving the remote session state for later redial.
 - Existing single-slot saves are migrated into the multi-target store and registered as a dialable carrier target.
 - Starting a new scan no longer destroys an existing run; discovered systems remain individually saved in the local phonebook.
 - Failed non-busy dial attempts produce four compressed ringbacks before `NO ANSWER` or `NO CARRIER`; successful calls ring briefly before modem negotiation.
-- The number of failed scan attempts was reduced slightly to keep the richer audio intro from becoming excessively long.
 - Production server bundles now use CommonJS `.cjs` output so bundled CommonJS dependencies such as `yaml` run correctly under Node.js 22.
 - Production systemd deployment now discovers the system-wide Node.js executable instead of assuming `/usr/bin/node`.
 - Runtime maintenance state can be changed with a flag file without restarting the daemon.
