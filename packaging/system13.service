@@ -11,7 +11,7 @@ WorkingDirectory=/opt/system13/current
 Environment=NODE_ENV=production
 Environment=SYSTEM13_CONFIG=/etc/system13/config.yaml
 Environment=SYSTEM13_MAINTENANCE_FILE=/var/lib/system13/maintenance
-ExecStart=@NODE_BIN@ /opt/system13/current/dist/server/index.js
+ExecStart=@NODE_BIN@ /opt/system13/current/dist/server/index.cjs
 Restart=on-failure
 RestartSec=2
 NoNewPrivileges=true
