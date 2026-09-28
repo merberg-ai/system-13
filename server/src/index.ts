@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { loadConfig, resolveConfigPath } from "./config.js";
 
 declare const __SYSTEM13_VERSION__: string;
@@ -10,10 +9,9 @@ const config = loadConfig();
 const startedAt = Date.now();
 const maintenanceFile = process.env.SYSTEM13_MAINTENANCE_FILE ?? "/var/lib/system13/maintenance";
 
-const here = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = process.env.SYSTEM13_PUBLIC_DIR
   ? path.resolve(process.env.SYSTEM13_PUBLIC_DIR)
-  : path.resolve(here, "../public");
+  : path.resolve("dist/public");
 
 const mimeTypes: Record<string, string> = {
   ".css": "text/css; charset=utf-8",
