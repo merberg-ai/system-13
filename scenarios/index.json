@@ -1,1 +1,4 @@
-[{"id":"american-meridian","path":"/scenarios/american-meridian/scenario.json"}]
+[
+  {"id":"american-meridian","path":"/scenarios/american-meridian/scenario.json"},
+  {"id":"northstar-relay","path":"/scenarios/northstar-relay/scenario.json"}
+]
