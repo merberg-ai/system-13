@@ -19,7 +19,7 @@
     "PROPERTY OF NORTHSTAR SYSTEMS GROUP",
     "AUTHORIZED FIELD SERVICE ONLY",
     "",
-    "Type HELP at the login prompt for field access information."
+    "Type HELP at the login prompt for remote-access assistance."
   ],
   "generation": {
     "variables": {
@@ -63,17 +63,20 @@
       "groups": {"root": 0, "field": 100, "ops": 110},
       "users": [
         {"id": "root", "username": "root", "uid": 0, "gid": 0, "groups": ["root"], "home": "/root", "shell": "/bin/ysh", "password": "{{rootPassword}}"},
+        {"id": "guest", "username": "guest", "uid": 999, "gid": 100, "groups": ["field"], "home": "/home/guest", "shell": "/bin/ysh", "password": "visitor"},
         {"id": "field", "username": "field", "uid": 1000, "gid": 100, "groups": ["field"], "home": "/home/field", "shell": "/bin/ysh", "password": "service"},
         {"id": "clarke", "username": "clarke", "uid": 1011, "gid": 110, "groups": ["ops", "field"], "home": "/home/clarke", "shell": "/bin/ysh", "password": "{{opsPassword}}"}
       ],
       "files": [
         {"path": "/root", "type": "dir", "owner": "root", "group": "root", "mode": 448},
         {"path": "/root/DARKLINE", "type": "dir", "owner": "root", "group": "root", "mode": 448},
+        {"path": "/home/guest", "type": "dir", "owner": "guest", "group": "field", "mode": 493},
         {"path": "/home/field", "type": "dir", "owner": "field", "group": "field", "mode": 493},
         {"path": "/home/clarke", "type": "dir", "owner": "clarke", "group": "ops", "mode": 448},
         {"path": "/var/backups", "type": "dir", "owner": "root", "group": "field", "mode": 493},
         {"path": "/var/mail", "type": "dir", "owner": "root", "group": "ops", "mode": 493},
-        {"path": "/home/field/README", "type": "file", "owner": "field", "group": "field", "mode": 420, "content": "NORTHSTAR FIELD SERVICE ACCESS\n\nThis terminal controls automated long-distance routing equipment for the {{city}} relay site.\n\nFIELD USER: field\nFIELD PASS: service\n\nLegacy operations backups remain enabled until the new switch management system is certified."},
+        {"path": "/home/guest/README", "type": "file", "owner": "guest", "group": "field", "mode": 420, "content": "NORTHSTAR REMOTE DIAGNOSTIC GUEST\n\nThis account is limited to public field-service documentation. Contractor access was moved to the shared field account during the relay modernization project.\n\nFIELD USER: field\nFIELD PASS: service\n\nPlease log out of guest before performing maintenance."},
+        {"path": "/home/field/README", "type": "file", "owner": "field", "group": "field", "mode": 420, "content": "NORTHSTAR FIELD SERVICE ACCESS\n\nThis terminal controls automated long-distance routing equipment for the {{city}} relay site.\n\nLegacy operations backups remain enabled until the new switch management system is certified."},
         {"path": "/var/backups/ops.env", "type": "file", "owner": "root", "group": "field", "mode": 420, "content": "# temporary migration environment\nOPS_USER=clarke\nOPS_PASS={{opsPassword}}\nNOTE=remove after relay acceptance testing"},
         {"path": "/var/mail/clarke", "type": "file", "owner": "clarke", "group": "ops", "mode": 384, "content": "From: noc-security@northstar.internal\nTo: clarke\nSubject: emergency root recovery code\n\nThe unattended relay keeps losing its secure token during brownouts. Until hardware replaces it, use the emergency root recovery phrase below if the switch comes up isolated.\n\nROOT RECOVERY: {{rootPassword}}\n\nDo not store this message.\n\n-NOC Security"},
         {"path": "/etc/relay.conf", "type": "file", "owner": "root", "group": "field", "mode": 420, "content": "SITE={{city}}\nTRUNKS=18\nDARKLINE=enabled\nDARKLINE_OWNER={{agency}}\nDARKLINE_ACCOUNTING=disabled"},
