@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "id": "northstar-relay",
+  "version": "1.0.0",
+  "title": "Northstar Relay Operations",
+  "company": {
+    "name": "Northstar Systems Group",
+    "slogan": "Connecting Tomorrow, Today."
+  },
+  "startHostId": "relay9",
+  "banner": [
+    "==================================================",
+    "          NORTHSTAR SYSTEMS GROUP",
+    "             NETWORK OPERATIONS",
+    "==================================================",
+    "",
+    "NSTAR/UX 2.6 // RELAY CONTROL NODE 9",
+    "",
+    "PROPERTY OF NORTHSTAR SYSTEMS GROUP",
+    "AUTHORIZED FIELD SERVICE ONLY",
+    "",
+    "Type HELP at the login prompt for field access information."
+  ],
+  "generation": {
+    "variables": {
+      "opsPassword": {
+        "kind": "password",
+        "words": ["switchboard", "carrier", "northstar", "relay", "copper"],
+        "digits": 2
+      },
+      "rootPassword": {
+        "kind": "password",
+        "words": ["darkline", "junction", "trunk", "crossbar", "nightshift"],
+        "digits": 2
+      },
+      "city": {
+        "kind": "choice",
+        "values": ["Briar Ridge", "Hawthorne", "Clearwater", "Dry Creek", "Mason Junction"]
+      },
+      "agency": {
+        "kind": "choice",
+        "values": ["Federal Communications Liaison Office", "Office of Continuity Planning", "National Signals Bureau", "Emergency Coordination Directorate"]
+      },
+      "anomaly": {
+        "kind": "choice",
+        "values": [
+          "Calls routed through the DARKLINE trunk contain a second audio channel that is not present at either endpoint.",
+          "The switch records completed calls to numbers that are not assigned in any Northstar exchange.",
+          "Several intercepted conversations are timestamped minutes before the originating subscriber goes off-hook.",
+          "The routing controller periodically creates temporary subscribers with no billing or physical service record."
+        ]
+      }
+    }
+  },
+  "hosts": [
+    {
+      "id": "relay9",
+      "hostname": "relay9",
+      "aliases": ["nstar9", "switch9"],
+      "os": "NSTAR/UX 2.6",
+      "kernel": "2.6.9-nsg",
+      "architecture": "i386",
+      "groups": {"root": 0, "field": 100, "ops": 110},
+      "users": [
+        {"id": "root", "username": "root", "uid": 0, "gid": 0, "groups": ["root"], "home": "/root", "shell": "/bin/ysh", "password": "{{rootPassword}}"},
+        {"id": "field", "username": "field", "uid": 1000, "gid": 100, "groups": ["field"], "home": "/home/field", "shell": "/bin/ysh", "password": "service"},
+        {"id": "clarke", "username": "clarke", "uid": 1011, "gid": 110, "groups": ["ops", "field"], "home": "/home/clarke", "shell": "/bin/ysh", "password": "{{opsPassword}}"}
+      ],
+      "files": [
+        {"path": "/root", "type": "dir", "owner": "root", "group": "root", "mode": 448},
+        {"path": "/root/DARKLINE", "type": "dir", "owner": "root", "group": "root", "mode": 448},
+        {"path": "/home/field", "type": "dir", "owner": "field", "group": "field", "mode": 493},
+        {"path": "/home/clarke", "type": "dir", "owner": "clarke", "group": "ops", "mode": 448},
+        {"path": "/var/backups", "type": "dir", "owner": "root", "group": "field", "mode": 493},
+        {"path": "/var/mail", "type": "dir", "owner": "root", "group": "ops", "mode": 493},
+        {"path": "/home/field/README", "type": "file", "owner": "field", "group": "field", "mode": 420, "content": "NORTHSTAR FIELD SERVICE ACCESS\n\nThis terminal controls automated long-distance routing equipment for the {{city}} relay site.\n\nFIELD USER: field\nFIELD PASS: service\n\nLegacy operations backups remain enabled until the new switch management system is certified."},
+        {"path": "/var/backups/ops.env", "type": "file", "owner": "root", "group": "field", "mode": 420, "content": "# temporary migration environment\nOPS_USER=clarke\nOPS_PASS={{opsPassword}}\nNOTE=remove after relay acceptance testing"},
+        {"path": "/var/mail/clarke", "type": "file", "owner": "clarke", "group": "ops", "mode": 384, "content": "From: noc-security@northstar.internal\nTo: clarke\nSubject: emergency root recovery code\n\nThe unattended relay keeps losing its secure token during brownouts. Until hardware replaces it, use the emergency root recovery phrase below if the switch comes up isolated.\n\nROOT RECOVERY: {{rootPassword}}\n\nDo not store this message.\n\n-NOC Security"},
+        {"path": "/etc/relay.conf", "type": "file", "owner": "root", "group": "field", "mode": 420, "content": "SITE={{city}}\nTRUNKS=18\nDARKLINE=enabled\nDARKLINE_OWNER={{agency}}\nDARKLINE_ACCOUNTING=disabled"},
+        {"path": "/root/DARKLINE/briefing.txt", "type": "file", "owner": "root", "group": "root", "mode": 384, "content": "DARKLINE // SPECIAL ROUTING PROGRAM\n\nPARTNER: {{agency}}\nSITE: {{city}} RELAY 9\nSTATUS: OPERATIONAL\n\nNorthstar engineering was instructed to reserve trunk group 13 for traffic that must not appear in normal billing, maintenance, or subscriber records.\n\nOBSERVATION:\n{{anomaly}}\n\nEngineering recommendation: disable trunk group and physically isolate controller.\nGovernment disposition: CONTINUE COLLECTION.\n\nEND OF FILE"}
+      ],
+      "processes": [
+        {"pid": 1, "user": "root", "command": "/sbin/init"},
+        {"pid": 43, "user": "root", "command": "/usr/sbin/inetd"},
+        {"pid": 96, "user": "root", "command": "/usr/local/sbin/switchd"},
+        {"pid": 113, "user": "root", "command": "/usr/local/sbin/darkroute"}
+      ],
+      "services": [
+        {"name": "switchd", "state": "running", "description": "Automatic routing controller"},
+        {"name": "darkroute", "state": "running", "description": "Restricted trunk routing"}
+      ],
+      "neighbors": [],
+      "commands": []
+    }
+  ],
+  "events": [
+    {
+      "id": "ops-backup-read",
+      "all": [{"type": "fileRead", "hostId": "relay9", "path": "/var/backups/ops.env"}],
+      "actions": [{"type": "learnCredential", "credentialId": "relay9:clarke"}]
+    },
+    {
+      "id": "darkline-root",
+      "all": [{"type": "rootOn", "hostId": "relay9"}],
+      "actions": [
+        {"type": "setFlag", "flag": "darkline-access"},
+        {"type": "output", "lines": ["", "ROOT CONTEXT ACCEPTED", "RESTRICTED ROUTING VOLUME: /root/DARKLINE", ""]}
+      ]
+    },
+    {
+      "id": "darkline-read",
+      "all": [{"type": "fileRead", "hostId": "relay9", "path": "/root/DARKLINE/briefing.txt"}],
+      "actions": [
+        {"type": "achievement", "id": "off-the-books"},
+        {"type": "ending", "id": "darkline", "title": "OFF THE BOOKS"},
+        {"type": "output", "lines": ["", "##################################################", "#              DARKLINE ACCESS LOGGED            #", "#                  SYSTEM 13                     #", "##################################################", "", "Some calls were never meant to have records.", ""]}
+      ]
+    }
+  ]
+}
