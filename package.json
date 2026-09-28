@@ -14,9 +14,10 @@
     "check": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "scenarios:validate": "tsx scripts/validate-scenarios.ts",
-    "start": "node dist/server/index.js",
+    "start": "node dist/server/index.cjs",
     "dev:server": "tsx watch server/src/index.ts",
-    "scenario:new": "node scripts/new-scenario.mjs"
+    "scenario:new": "node scripts/new-scenario.mjs",
+    "smoke:production": "bash scripts/smoke-production.sh"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
