@@ -17,6 +17,12 @@ SHORT="${SHA:0:12}"
 RELEASE="$SYSTEM13_RELEASES/$SHA"
 PREVIOUS="$(current_release)"
 
+if [[ -n "$PREVIOUS" ]]; then
+  log RELEASE "Current release: $PREVIOUS"
+else
+  log RELEASE "No valid previous release detected."
+fi
+
 log BUILD "Testing and building $SHORT"
 cd "$SYSTEM13_REPO"
 npm install --no-package-lock
@@ -53,20 +59,33 @@ sed "s#@NODE_BIN@#$NODE_BIN#g" "$SYSTEM13_REPO/packaging/system13.service" > /et
 chmod 0644 /etc/systemd/system/system13.service
 chown root:root /etc/systemd/system/system13.service
 install -o root -g root -m 0755 "$SYSTEM13_REPO/tools/system13ctl" /usr/local/bin/system13ctl
+
+if command -v systemd-analyze >/dev/null 2>&1; then
+  systemd-analyze verify /etc/systemd/system/system13.service >/dev/null || die "system13.service failed systemd verification."
+fi
+
 ln -sfn "$RELEASE" "$SYSTEM13_ROOT/current.new"
 mv -Tf "$SYSTEM13_ROOT/current.new" "$SYSTEM13_CURRENT"
 systemctl daemon-reload
 systemctl enable system13.service >/dev/null
+systemctl reset-failed system13.service >/dev/null 2>&1 || true
 systemctl restart system13.service
 
 if ! health_check; then
   log FAIL "New release failed health check."
-  if [[ -n "$PREVIOUS" && -d "$PREVIOUS" ]]; then
+  show_service_diagnostics
+  if [[ -n "$PREVIOUS" && -d "$PREVIOUS" && "$PREVIOUS" != "$RELEASE" ]]; then
     log ROLLBACK "Restoring $PREVIOUS"
     ln -sfn "$PREVIOUS" "$SYSTEM13_ROOT/current.new"
     mv -Tf "$SYSTEM13_ROOT/current.new" "$SYSTEM13_CURRENT"
     systemctl restart system13.service
-    health_check || die "Rollback release also failed health check."
+    if ! health_check; then
+      show_service_diagnostics
+      die "Rollback release also failed health check."
+    fi
+    log ROLLBACK "Previous release restored and healthy."
+  else
+    log WARN "No valid previous release is available for rollback."
   fi
   exit 1
 fi
