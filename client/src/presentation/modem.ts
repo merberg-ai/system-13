@@ -21,7 +21,10 @@ function numberFor(index: number, suffix: number): string {
 export function planWarDial(seed: string): WarDialPlan {
   const rng = rngStream(seed, "war-dial");
   const attempts: WarDialAttempt[] = [];
-  const count = rng.integer(4, 6);
+
+  // A scan should always feel like a search: at least one failed call, but
+  // enough variation that repeated scans do not settle into an obvious rhythm.
+  const count = rng.integer(1, 8);
 
   for (let index = 0; index < count; index += 1) {
     const number = numberFor(index, rng.integer(0, 99));
