@@ -19,10 +19,15 @@ The project is currently pre-release.
 - Command parser and initial command set: `help`, `clear`, `pwd`, `cd`, `ls`, `cat`, `whoami`, `id`, `uname`, `hostname`, `history`, `grep`, `find`, `ps`, `env`, `su`, `sudo`, `ssh`, `exit`, `netstat`, `mail`, and `system`.
 - Declarative scenario event conditions/actions with no arbitrary scenario code execution.
 - IndexedDB player saves with localStorage fallback, autosave, resume, disconnect/reconnect, and new-run handling.
-- American Meridian Corporation first scenario with twelve randomly selected classified projects: ORPHEUS, HARVEST, JANUS, COLDSTAR, WATCHTOWER, LAMPLIGHT, CHIMERA, NIGHTGLASS, HOMEFRONT, REDWOOD, PALADIN, and ECHO.
-- Complete first guest-to-root progression across `node13` and `archive03`, including a fictional diagnostic privilege-escalation route and first ending.
+- Local SYSTEM 13 control shell with ASCII banner, `scan`, `dial`, `redial`, `targets`, `history`, `status`, and lightweight local Unix-style aliases.
+- Multi-target save storage and a persistent local phonebook so multiple remote systems can be revisited without destroying previous progress.
+- Manual dialing for known and unknown numbers, with known targets restoring their saved remote session and unknown numbers returning simulated carrier failures.
+- American Meridian Corporation scenario with twelve randomly selected classified projects: ORPHEUS, HARVEST, JANUS, COLDSTAR, WATCHTOWER, LAMPLIGHT, CHIMERA, NIGHTGLASS, HOMEFRONT, REDWOOD, PALADIN, and ECHO.
+- Complete American Meridian guest-to-root progression across `node13` and `archive03`, including a fictional diagnostic privilege-escalation route and BLACK RETENTION ending.
+- Northstar Systems Group relay scenario with an independent field-service login, operations-account escalation path, root recovery trail, and DARKLINE ending.
+- Scenario selection during new war-dial scans, preferring a different scenario pack than the currently active target when alternatives are available.
 - Scenario index, schema validation, deterministic generation, authoring documentation, and `npm run scenario:new -- <id>` helper.
-- Engine tests covering RNG, parsing, permissions, deterministic generation, and the complete first-run escalation path.
+- Engine tests covering RNG, parsing, permissions, deterministic generation, the complete American Meridian escalation path, local dialer commands, multi-target phonebook behavior, and the Northstar field-to-root path.
 - GitHub Actions checks for shell syntax, TypeScript, scenario validation, tests, production build, and a real built-daemon `/health` smoke test.
 - Production deployment tooling with a dedicated `system13` account, systemd service, immutable releases, atomic switching, health checks, pre-activation production smoke testing, automatic rollback, backups, and maintenance mode.
 - `system13ctl` administrative helper for service control, configuration, scenarios, releases, maintenance, Nginx, SSL, backup, update, rollback, and uninstall operations.
@@ -32,8 +37,12 @@ The project is currently pre-release.
 
 ### Changed
 
-- Version advanced to `0.1.0-alpha.2` after initial live-host qualification and the war-dial audio pass.
-- Failed non-busy dial attempts now produce four compressed ringbacks before `NO ANSWER` or `NO CARRIER`; successful calls ring briefly before modem negotiation.
+- Version advanced to `0.1.0-alpha.3` for the local-shell, multi-target, and second-scenario milestone.
+- Top-level remote `exit`, `logout`, or `quit` now hangs up the modem and returns to the SYSTEM 13 local shell; nested SSH `exit` still returns to the previous remote host.
+- `system disconnect` now drops carrier back to local control while preserving the remote session state for later redial.
+- Existing single-slot saves are migrated into the multi-target store and registered as a dialable carrier target.
+- Starting a new scan no longer destroys an existing run; discovered systems remain individually saved in the local phonebook.
+- Failed non-busy dial attempts produce four compressed ringbacks before `NO ANSWER` or `NO CARRIER`; successful calls ring briefly before modem negotiation.
 - The number of failed scan attempts was reduced slightly to keep the richer audio intro from becoming excessively long.
 - Production server bundles now use CommonJS `.cjs` output so bundled CommonJS dependencies such as `yaml` run correctly under Node.js 22.
 - Production systemd deployment now discovers the system-wide Node.js executable instead of assuming `/usr/bin/node`.
