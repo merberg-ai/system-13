@@ -30,6 +30,7 @@ npm run check
 npm run scenarios:validate
 npm test
 npm run build
+npm run smoke:production
 
 if ! id system13 >/dev/null 2>&1; then
   useradd --system --home "$SYSTEM13_DATA" --shell /usr/sbin/nologin system13
