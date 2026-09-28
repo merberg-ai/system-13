@@ -1,8 +1,8 @@
 import { GameEngine } from "../engine/core/engine.js";
 import type { RunSave } from "../engine/core/types.js";
-import { randomSeed, runIdFromSeed } from "../engine/rng/rng.js";
+import { randomSeed, rngStream, runIdFromSeed } from "../engine/rng/rng.js";
 import { generateWorld } from "../engine/scenario/generator.js";
-import { loadScenario } from "../engine/scenario/loader.js";
+import { loadScenario, loadScenarioIndex } from "../engine/scenario/loader.js";
 import { assertCompatibleSave, makeSave } from "../engine/save/save.js";
 import { SaveStore } from "../engine/save/store.js";
 import {
@@ -23,7 +23,6 @@ import {
 import { SoundEngine } from "../presentation/sound.js";
 import { TerminalUI } from "../terminal/terminal.js";
 
-const DEFAULT_SCENARIO = "american-meridian";
 const LOCAL_PROMPT = "operator@system13:~$ ";
 
 type AppMode = "local-shell" | "busy" | "engine" | "new-confirm";
@@ -55,7 +54,6 @@ export class System13App {
           saveLocalClientState(this.local);
         }
         this.currentNumber = number;
-        // Migrate legacy single-slot saves into the multi-target store.
         await this.saves.save(save);
         this.showLocalShell("LOCAL SESSION IMAGE DETECTED");
         return;
@@ -180,7 +178,13 @@ export class System13App {
 
     for (const attempt of plan.attempts) recordDial(this.local, attempt.number, attempt.outcome);
 
-    const scenario = await loadScenario(DEFAULT_SCENARIO);
+    const index = await loadScenarioIndex();
+    if (index.length === 0) throw new Error("no scenarios are installed");
+    const alternatives = this.currentSave && index.length > 1
+      ? index.filter((entry) => entry.id !== this.currentSave?.scenarioId)
+      : index;
+    const selected = rngStream(seed, "scenario-select").pick(alternatives.length > 0 ? alternatives : index);
+    const scenario = await loadScenario(selected.id);
     const world = generateWorld(scenario, seed);
     this.engine = new GameEngine(world);
     this.currentSave = makeSave(this.engine);
